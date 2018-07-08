@@ -1,0 +1,27 @@
+{
+  "name": "replay-tools",
+  "version": "0.1.0",
+  "description": "Utils for working with ReplayMod files (.mcpr)",
+  "main": "src/index.js",
+  "bin": {
+    "replayToJson": "examples/replayToJson.js"
+  },
+  "author": "Gjum",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gjum/replay-tools.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Gjum/replay-tools/issues"
+  },
+  "homepage": "https://github.com/Gjum/replay-tools#readme",
+  "dependencies": {
+    "minecraft-data": "^2.26.0",
+    "prismarine-nbt": "^1.2.0",
+    "protodef": "^1.6.7",
+    "uuid-1345": "^0.99.7",
+    "yauzl": "^2.10.0",
+    "zlib": "^1.0.5"
+  }
+}
