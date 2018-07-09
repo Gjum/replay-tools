@@ -16,13 +16,13 @@ This library exposes one function: `openReplayFile(path: String, options: { filt
 
 `path` is a string specifying the `.mcpr` file path.
 
-`filter` is an optional function, see [Filtering](#Filtering).
+`filter` is an optional function, see [Filtering](#filtering).
 
 The function returns a Promise whose success type is `{ metaData, packetStream }`.
 
-`metaData` contains info about the `.mcpr` file, see [Metadata](#Metadata).
+`metaData` contains info about the `.mcpr` file, see [Metadata](#metadata).
 
-`packetStream` is a NodeJS `Stream` of packet objects, see [Packet Format](#Packet-Format).
+`packetStream` is a NodeJS `Stream` of packet objects, see [Packet Format](#packet-format).
 
 ### Metadata
 
