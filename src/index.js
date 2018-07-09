@@ -31,10 +31,13 @@ class Parser extends Transform {
       let packet = null
       let size = NaN
       try {
+        if (8 >= this.queue.length) {
+          return cb() // wait for more data
+        }
         const date = this.queue.readUInt32BE(0) + this.startDate
         size = this.queue.readUInt32BE(4)
         if (size + 8 > this.queue.length) {
-          throw new RangeError('Buffer too small')
+          return cb() // wait for more data
         }
         const id = this.queue.readUInt8(8)
         if (!this.filter || this.filter({ date, size, id })) {
@@ -44,7 +47,7 @@ class Parser extends Transform {
       }
       catch (e) {
         if (e.partialReadError || e instanceof RangeError) {
-          return cb()
+          return cb() // wait for more data
         } else {
           e.buffer = this.queue
           this.queue = new Buffer(0)
