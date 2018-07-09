@@ -14,15 +14,13 @@ dumping chat packets as JSON stream to stdout and ignoring all other packets.
 
 This library exposes one function: `openReplayFile(path: String, options: { filter = null })`
 
-`path` is a string specifying the `.mcpr` file path.
+- `path` is a string specifying the `.mcpr` file path.
+- `filter` is an optional function, see [Filtering](#filtering).
 
-`filter` is an optional function, see [Filtering](#filtering).
+`openReplayFile` returns a Promise whose success type is `{ metaData, packetStream }`:
 
-The function returns a Promise whose success type is `{ metaData, packetStream }`.
-
-`metaData` contains info about the `.mcpr` file, see [Metadata](#metadata).
-
-`packetStream` is a NodeJS `Stream` of packet objects, see [Packet Format](#packet-format).
+- `metaData` contains info about the `.mcpr` file, see [Metadata](#metadata).
+- `packetStream` is a NodeJS `Stream` of packet objects, see [Packet Format](#packet-format).
 
 ### Metadata
 
