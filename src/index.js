@@ -16,13 +16,14 @@ function createMcProtocol(state, direction, version) {
   return proto
 }
 
-class Parser extends Transform {
+class MCPRParser extends Transform {
   constructor(proto, startDate, { filter = null } = {}) {
     super({ readableObjectMode: true })
     this.proto = proto
     this.startDate = startDate
     this.filter = filter
     this.queue = Buffer.alloc(0)
+    this.processedBytes = 0
   }
 
   _transform(chunk, enc, cb) {
@@ -30,36 +31,35 @@ class Parser extends Transform {
     while (true) {
       let packet = null
       let size = NaN
+      let id = null
       try {
         if (8 >= this.queue.length) {
-          return cb() // wait for more data
+          break // wait for more data
         }
         const date = this.queue.readUInt32BE(0) + this.startDate
         size = this.queue.readUInt32BE(4)
         if (size + 8 > this.queue.length) {
-          return cb() // wait for more data
+          break // wait for more data
         }
-        const id = this.queue.readUInt8(8)
+        id = this.queue.readUInt8(8)
         if (!this.filter || this.filter({ date, size, id })) {
           const data = this.proto.parsePacketBuffer('packet', this.queue.slice(8, 8 + size)).data
-          packet = { date, size, id, ...data }
+          packet = { date, id, size, ...data }
+          this.push(packet)
         }
-      }
-      catch (e) {
+      } catch (e) {
         if (e.partialReadError || e instanceof RangeError) {
-          return cb() // wait for more data
+          console.error(`Skipping: PartialReadError/RangeError in packet id`, id, 'size', size, 'at byte', this.processedBytes)
+          // skip this packet; maybe we could return cb() to wait for more data
         } else {
           e.buffer = this.queue
-          this.queue = new Buffer(0)
-          return cb(e)
+          console.error(`Skipping: Failed parsing packet id`, id, 'size', size, 'at byte', this.processedBytes)
         }
       }
-
-      if (packet) {
-        this.push(packet)
-      }
       this.queue = this.queue.slice(8 + size)
+      this.processedBytes += 8 + size
     }
+    return cb() // wait for more data
   }
 }
 
@@ -80,8 +80,7 @@ function openReplayFile(path, { filter = null } = {}) {
             recordingStream = stream
             if (metaData) resolve({ metaData, recordingStream, zipfile })
           })
-        }
-        if ('metaData.json' === entry.fileName) {
+        } else if ('metaData.json' === entry.fileName) {
           zipfile.openReadStream(entry, (err, stream) => {
             if (err) reject(err)
             const chunks = []
@@ -93,12 +92,19 @@ function openReplayFile(path, { filter = null } = {}) {
               if (recordingStream) resolve({ metaData, recordingStream, zipfile })
             })
           })
-        }
+        } else if ('mods.json' === entry.fileName) {
+        	// ignore
+        } else if ('markers.json' === entry.fileName) {
+        	// ignore
+        } else if ('recording.tmcpr.crc32' === entry.fileName) {
+        	// ignore
+        } else console.error(`Unknown zip entry`, entry.fileName)
       })
     })
   }).then(({ metaData, recordingStream }) => {
     const proto = createMcProtocol('play', 'toClient', metaData.mcversion)
-    const parser = new Parser(proto, metaData.date, { filter })
+    console.error(`Using protocol version`, metaData.mcversion)
+    const parser = new MCPRParser(proto, metaData.date, { filter })
     const packetStream = recordingStream.pipe(parser)
     return { metaData, packetStream }
   })
