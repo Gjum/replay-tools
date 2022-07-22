@@ -17,9 +17,11 @@
   },
   "homepage": "https://github.com/Gjum/replay-tools#readme",
   "dependencies": {
-    "minecraft-data": "^2.26.0",
-    "prismarine-nbt": "^1.2.0",
-    "protodef": "^1.6.7",
+    "minecraft-data": "^3.8.0",
+    "pngjs": "^5.0.0",
+    "prismarine-chunk": "^1.31.0",
+    "prismarine-nbt": "^2.2.1",
+    "protodef": "^1.15.0",
     "uuid-1345": "^0.99.7",
     "yauzl": "^2.10.0",
     "zlib": "^1.0.5"
